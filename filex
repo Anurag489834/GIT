@@ -1,0 +1,1554 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "yA9HITz_xxyE",
+    "outputId": "4283609d-6549-4a30-9a70-9012b14c2715"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/\n",
+      "Requirement already satisfied: yfinance in /usr/local/lib/python3.8/dist-packages (0.2.4)\n",
+      "Requirement already satisfied: numpy>=1.16.5 in /usr/local/lib/python3.8/dist-packages (from yfinance) (1.21.6)\n",
+      "Requirement already satisfied: cryptography>=3.3.2 in /usr/local/lib/python3.8/dist-packages (from yfinance) (39.0.0)\n",
+      "Requirement already satisfied: lxml>=4.9.1 in /usr/local/lib/python3.8/dist-packages (from yfinance) (4.9.2)\n",
+      "Requirement already satisfied: pytz>=2022.5 in /usr/local/lib/python3.8/dist-packages (from yfinance) (2022.7)\n",
+      "Requirement already satisfied: beautifulsoup4>=4.11.1 in /usr/local/lib/python3.8/dist-packages (from yfinance) (4.11.1)\n",
+      "Requirement already satisfied: html5lib>=1.1 in /usr/local/lib/python3.8/dist-packages (from yfinance) (1.1)\n",
+      "Requirement already satisfied: pandas>=1.3.0 in /usr/local/lib/python3.8/dist-packages (from yfinance) (1.3.5)\n",
+      "Requirement already satisfied: requests>=2.26 in /usr/local/lib/python3.8/dist-packages (from yfinance) (2.28.2)\n",
+      "Requirement already satisfied: appdirs>=1.4.4 in /usr/local/lib/python3.8/dist-packages (from yfinance) (1.4.4)\n",
+      "Requirement already satisfied: multitasking>=0.0.7 in /usr/local/lib/python3.8/dist-packages (from yfinance) (0.0.11)\n",
+      "Requirement already satisfied: frozendict>=2.3.4 in /usr/local/lib/python3.8/dist-packages (from yfinance) (2.3.4)\n",
+      "Requirement already satisfied: soupsieve>1.2 in /usr/local/lib/python3.8/dist-packages (from beautifulsoup4>=4.11.1->yfinance) (2.3.2.post1)\n",
+      "Requirement already satisfied: cffi>=1.12 in /usr/local/lib/python3.8/dist-packages (from cryptography>=3.3.2->yfinance) (1.15.1)\n",
+      "Requirement already satisfied: webencodings in /usr/local/lib/python3.8/dist-packages (from html5lib>=1.1->yfinance) (0.5.1)\n",
+      "Requirement already satisfied: six>=1.9 in /usr/local/lib/python3.8/dist-packages (from html5lib>=1.1->yfinance) (1.15.0)\n",
+      "Requirement already satisfied: python-dateutil>=2.7.3 in /usr/local/lib/python3.8/dist-packages (from pandas>=1.3.0->yfinance) (2.8.2)\n",
+      "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.8/dist-packages (from requests>=2.26->yfinance) (2.1.1)\n",
+      "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.8/dist-packages (from requests>=2.26->yfinance) (2022.12.7)\n",
+      "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.8/dist-packages (from requests>=2.26->yfinance) (2.10)\n",
+      "Requirement already satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.8/dist-packages (from requests>=2.26->yfinance) (1.24.3)\n",
+      "Requirement already satisfied: pycparser in /usr/local/lib/python3.8/dist-packages (from cffi>=1.12->cryptography>=3.3.2->yfinance) (2.21)\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install yfinance"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "R9pqrvRbZi0c"
+   },
+   "source": [
+    "# **Import Library**"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "ATb30BVhx3To"
+   },
+   "outputs": [],
+   "source": [
+    "import yfinance as yf"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "ZQkaTYzYZ0RP"
+   },
+   "source": [
+    "import data for google stock from yfinance from 2004 to 2023\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "id": "DaP9s32b0Naf"
+   },
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "from sklearn.preprocessing import MinMaxScaler\n",
+    "from sklearn.metrics import mean_squared_error\n",
+    "\n",
+    "from tensorflow.keras.models import Sequential\n",
+    "from tensorflow.keras.layers import Dense, LSTM, Dropout, GRU, Bidirectional\n",
+    "from tensorflow.keras.optimizers import SGD\n",
+    "from tensorflow.random import set_seed"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "yTBGkd-wx7p8",
+    "outputId": "3adbf727-3a63-443a-ffb4-98be983f9b17"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "[*********************100%***********************]  1 of 1 completed\n"
+     ]
+    }
+   ],
+   "source": [
+    "dataset=yf.download('GOOGL',start='2004-01-16',end='2023-01-16',period='1d')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "avzZnQ7CcDEn"
+   },
+   "source": [
+    "**Data Exploration**\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "FS_HnTVNy6Uv",
+    "outputId": "db89e5d5-a4b2-4ec5-f711-efa243d0110c"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "DatetimeIndex: 4634 entries, 2004-08-19 00:00:00-04:00 to 2023-01-13 00:00:00-05:00\n",
+      "Data columns (total 6 columns):\n",
+      " #   Column     Non-Null Count  Dtype  \n",
+      "---  ------     --------------  -----  \n",
+      " 0   Open       4634 non-null   float64\n",
+      " 1   High       4634 non-null   float64\n",
+      " 2   Low        4634 non-null   float64\n",
+      " 3   Close      4634 non-null   float64\n",
+      " 4   Adj Close  4634 non-null   float64\n",
+      " 5   Volume     4634 non-null   int64  \n",
+      "dtypes: float64(5), int64(1)\n",
+      "memory usage: 382.5 KB\n"
+     ]
+    }
+   ],
+   "source": [
+    "dataset.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 237
+    },
+    "id": "yr7-U-DSy911",
+    "outputId": "800c4e8d-c96b-4195-bd0b-bdb58f207483"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "  <div id=\"df-85788626-8acc-4132-99d7-eae85643be38\">\n",
+       "    <div class=\"colab-df-container\">\n",
+       "      <div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Open</th>\n",
+       "      <th>High</th>\n",
+       "      <th>Low</th>\n",
+       "      <th>Close</th>\n",
+       "      <th>Adj Close</th>\n",
+       "      <th>Volume</th>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Date</th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "      <th></th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>2004-08-19 00:00:00-04:00</th>\n",
+       "      <td>2.502503</td>\n",
+       "      <td>2.604104</td>\n",
+       "      <td>2.401401</td>\n",
+       "      <td>2.511011</td>\n",
+       "      <td>2.511011</td>\n",
+       "      <td>893181924</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2004-08-20 00:00:00-04:00</th>\n",
+       "      <td>2.527778</td>\n",
+       "      <td>2.729730</td>\n",
+       "      <td>2.515015</td>\n",
+       "      <td>2.710460</td>\n",
+       "      <td>2.710460</td>\n",
+       "      <td>456686856</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2004-08-23 00:00:00-04:00</th>\n",
+       "      <td>2.771522</td>\n",
+       "      <td>2.839840</td>\n",
+       "      <td>2.728979</td>\n",
+       "      <td>2.737738</td>\n",
+       "      <td>2.737738</td>\n",
+       "      <td>365122512</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2004-08-24 00:00:00-04:00</th>\n",
+       "      <td>2.783784</td>\n",
+       "      <td>2.792793</td>\n",
+       "      <td>2.591842</td>\n",
+       "      <td>2.624374</td>\n",
+       "      <td>2.624374</td>\n",
+       "      <td>304946748</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2004-08-25 00:00:00-04:00</th>\n",
+       "      <td>2.626627</td>\n",
+       "      <td>2.702703</td>\n",
+       "      <td>2.599600</td>\n",
+       "      <td>2.652653</td>\n",
+       "      <td>2.652653</td>\n",
+       "      <td>183772044</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>\n",
+       "      <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-85788626-8acc-4132-99d7-eae85643be38')\"\n",
+       "              title=\"Convert this dataframe to an interactive table.\"\n",
+       "              style=\"display:none;\">\n",
+       "        \n",
+       "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+       "       width=\"24px\">\n",
+       "    <path d=\"M0 0h24v24H0V0z\" fill=\"none\"/>\n",
+       "    <path d=\"M18.56 5.44l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94zm-11 1L8.5 8.5l.94-2.06 2.06-.94-2.06-.94L8.5 2.5l-.94 2.06-2.06.94zm10 10l.94 2.06.94-2.06 2.06-.94-2.06-.94-.94-2.06-.94 2.06-2.06.94z\"/><path d=\"M17.41 7.96l-1.37-1.37c-.4-.4-.92-.59-1.43-.59-.52 0-1.04.2-1.43.59L10.3 9.45l-7.72 7.72c-.78.78-.78 2.05 0 2.83L4 21.41c.39.39.9.59 1.41.59.51 0 1.02-.2 1.41-.59l7.78-7.78 2.81-2.81c.8-.78.8-2.07 0-2.86zM5.41 20L4 18.59l7.72-7.72 1.47 1.35L5.41 20z\"/>\n",
+       "  </svg>\n",
+       "      </button>\n",
+       "      \n",
+       "  <style>\n",
+       "    .colab-df-container {\n",
+       "      display:flex;\n",
+       "      flex-wrap:wrap;\n",
+       "      gap: 12px;\n",
+       "    }\n",
+       "\n",
+       "    .colab-df-convert {\n",
+       "      background-color: #E8F0FE;\n",
+       "      border: none;\n",
+       "      border-radius: 50%;\n",
+       "      cursor: pointer;\n",
+       "      display: none;\n",
+       "      fill: #1967D2;\n",
+       "      height: 32px;\n",
+       "      padding: 0 0 0 0;\n",
+       "      width: 32px;\n",
+       "    }\n",
+       "\n",
+       "    .colab-df-convert:hover {\n",
+       "      background-color: #E2EBFA;\n",
+       "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+       "      fill: #174EA6;\n",
+       "    }\n",
+       "\n",
+       "    [theme=dark] .colab-df-convert {\n",
+       "      background-color: #3B4455;\n",
+       "      fill: #D2E3FC;\n",
+       "    }\n",
+       "\n",
+       "    [theme=dark] .colab-df-convert:hover {\n",
+       "      background-color: #434B5C;\n",
+       "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+       "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+       "      fill: #FFFFFF;\n",
+       "    }\n",
+       "  </style>\n",
+       "\n",
+       "      <script>\n",
+       "        const buttonEl =\n",
+       "          document.querySelector('#df-85788626-8acc-4132-99d7-eae85643be38 button.colab-df-convert');\n",
+       "        buttonEl.style.display =\n",
+       "          google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+       "\n",
+       "        async function convertToInteractive(key) {\n",
+       "          const element = document.querySelector('#df-85788626-8acc-4132-99d7-eae85643be38');\n",
+       "          const dataTable =\n",
+       "            await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+       "                                                     [key], {});\n",
+       "          if (!dataTable) return;\n",
+       "\n",
+       "          const docLinkHtml = 'Like what you see? Visit the ' +\n",
+       "            '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+       "            + ' to learn more about interactive tables.';\n",
+       "          element.innerHTML = '';\n",
+       "          dataTable['output_type'] = 'display_data';\n",
+       "          await google.colab.output.renderOutput(dataTable, element);\n",
+       "          const docLink = document.createElement('div');\n",
+       "          docLink.innerHTML = docLinkHtml;\n",
+       "          element.appendChild(docLink);\n",
+       "        }\n",
+       "      </script>\n",
+       "    </div>\n",
+       "  </div>\n",
+       "  "
+      ],
+      "text/plain": [
+       "                               Open      High       Low     Close  Adj Close  \\\n",
+       "Date                                                                           \n",
+       "2004-08-19 00:00:00-04:00  2.502503  2.604104  2.401401  2.511011   2.511011   \n",
+       "2004-08-20 00:00:00-04:00  2.527778  2.729730  2.515015  2.710460   2.710460   \n",
+       "2004-08-23 00:00:00-04:00  2.771522  2.839840  2.728979  2.737738   2.737738   \n",
+       "2004-08-24 00:00:00-04:00  2.783784  2.792793  2.591842  2.624374   2.624374   \n",
+       "2004-08-25 00:00:00-04:00  2.626627  2.702703  2.599600  2.652653   2.652653   \n",
+       "\n",
+       "                              Volume  \n",
+       "Date                                  \n",
+       "2004-08-19 00:00:00-04:00  893181924  \n",
+       "2004-08-20 00:00:00-04:00  456686856  \n",
+       "2004-08-23 00:00:00-04:00  365122512  \n",
+       "2004-08-24 00:00:00-04:00  304946748  \n",
+       "2004-08-25 00:00:00-04:00  183772044  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "6mhBhD4WcYqN"
+   },
+   "source": [
+    "From here we can see our data has 6 columns:\n",
+    "\n",
+    "Date: The date of recorded data\n",
+    "\n",
+    "Open: The price when stock market open\n",
+    "\n",
+    "High: The highest price price of date\n",
+    "\n",
+    "Low: The lowest price point of date\n",
+    "\n",
+    "Volumn: Total Sale of stock on that date\n",
+    "\n",
+    "From this point we going to define our goal is to predict the close price of the given date from test data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "6psjDgUp0f_7",
+    "outputId": "a7058aee-cfa8-4617-ff7f-e32eeb58fd05"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Open         0\n",
+       "High         0\n",
+       "Low          0\n",
+       "Close        0\n",
+       "Adj Close    0\n",
+       "Volume       0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "## Checking if there is any null values\n",
+    "dataset.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "LMrjtltw0zhX"
+   },
+   "source": [
+    "Function to create train and test dataset from the given time series data."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "kYKa8RWJ0wiJ",
+    "outputId": "ce8d6481-efce-4794-eba0-0b301c95947a"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(Timestamp('2004-08-19 00:00:00-0400', tz='America/New_York'),\n",
+       " Timestamp('2023-01-13 00:00:00-0500', tz='America/New_York'))"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.index.min(), dataset.index.max()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "__TU2MkV02wt",
+    "outputId": "2610df50-190c-4c8a-920d-f5bb77092045"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2004\n"
+     ]
+    }
+   ],
+   "source": [
+    "## Train and Test Plot function\n",
+    "tstart = 2004\n",
+    "tend = 2020\n",
+    "\n",
+    "print(f'{tstart}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 285
+    },
+    "id": "mswzrYrN1U91",
+    "outputId": "5c7461ae-989d-466b-d2fb-cde3dd5db8b8"
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "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IlKuNH1XREREREREKoxGSkVERERERKTCKCkVERERERGRCuNX0QEA1KtXz0ZFRVV0GCIiIiIiIlIGli1btt9aWz+vtkqRlEZFRREXF1fRYYiIiIiIiEgZMMZsy69N03dFRERERESkwigpFRERERERkQqjpFREREREREQqTKV4pzQvaWlpxMfHk5ycXNGhSDUVFBREZGQk/v7+FR2KiIiIiMgpq9ImpfHx8YSFhREVFYUxpqLDkWrGWktiYiLx8fE0b968osMRERERETllVdrpu8nJyYSHhyshlTJhjCE8PFwj8SIiIiKnqkM7wNqKjkKoxEkpoIRUypT+fomIiIicgtJTYdUX8FJ7+P3tio5GqORJqYiIiIiISKn68lb4/EanvP57OHHI+SMVRklpPhITE4mJiSEmJoZGjRoRERHhPk9NTS3w2ri4OO66666Tep61lvPPP5/Dhw8D4OvrS0xMDJ06daJLly4sXLiw0HtMmjSJtm3bMnz48JN6dmF+/vlnYmNj6dChA7GxscyZM8fdtmzZMjp06EDLli256667sK4pEPfffz9nnHEGHTt2ZOjQoRw65PxDT0xMpE+fPoSGhnLHHXd4PeeCCy7g4MGDpRq7iIiIiIjbV/+A1V96zk8chP+c5vxZ8w1MvwQyMzzt42rBr/9X/nGeYpSU5iM8PJwVK1awYsUKRo8ezT333OM+DwgIID09Pd9ru3btyqRJk07qeT/88AOdOnWiZs2aAAQHB7NixQr+/PNPnn32WR566KFC7zF58mR+/vlnPvjggyI9s6DPkF29evX49ttvWblyJdOnT+f66693t91+++28/fbbbNiwgQ0bNjBjxgwA+vXrx6pVq/jrr79o3bo1zz77LOCsePv0008zceLEXM+5/vrrmTx5cpFiEhERERE5aSty/JwcUs9T/vR62DIfjiU455mZznH2U+UT2yms0q6+m92T365mza7DpXrPdk1q8sQl0Sd1zahRowgKCmL58uX07NmTa665hjFjxpCcnExwcDDvvvsubdq0Yd68eUycOJHvvvuOcePGsX37djZv3sz27du5++678xxF/eCDD7j11lvzfO7hw4epU6eO+/z555/n008/JSUlhaFDh/Lkk08yevRoNm/ezMCBA7nxxhsZOXIkN954I5s3byYkJIS33nqLjh07Mm7cODZt2sTmzZtp1qwZkyZNYvTo0Wzfvh2Al156iZ49e3o9v3Pnzu5ydHQ0J06cICUlhQMHDnD48GG6d+8OwIgRI/jqq68YOHAg/fv3d1/TvXt3Pv/8cwBq1KhBr1692LhxY67POXjwYM455xweeeSRov4nEREREREpvk2zc9dtWwjtLwObWf7xnKKqRFJamcTHx7Nw4UJ8fX05fPgwv/76K35+fsyaNYuHH36YL774Itc169atY+7cuRw5coQ2bdpw++2359ob87fffuPNN990n584cYKYmBiSk5PZvXu3e8rszJkz2bBhA7///jvWWgYPHsz8+fN54403mDFjBnPnzqVevXrceeeddO7cma+++oo5c+YwYsQIVqxYAcCaNWtYsGABwcHBDBs2jHvuuYdevXqxfft2BgwYwNq1a/P9/F988QVdunQhMDCQnTt3EhkZ6W6LjIxk586dua6ZOnUqV199daHfbZ06dUhJSSExMZH
+      "text/plain": [
+       "<Figure size 1152x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "def train_test_plot(dataset, tstart, tend):\n",
+    "    dataset.loc[f\"{tstart}\":f\"{tend}\", \"Close\"].plot(figsize=(16, 4), legend=True)\n",
+    "    dataset.loc[f\"{tend+1}\":, \"Close\"].plot(figsize=(16, 4), legend=True)\n",
+    "    plt.legend([f\"Train (Before {tend+1})\", f\"Test ({tend+1} and beyond)\"])\n",
+    "    plt.title(\"Google stock price\")\n",
+    "    plt.show()\n",
+    "\n",
+    "train_test_plot(dataset,tstart,tend)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "id": "BwjrIyye12q9"
+   },
+   "outputs": [],
+   "source": [
+    "## Train and Test data split function\n",
+    "def train_test_split(dataset, tstart, tend):\n",
+    "    train = dataset.loc[f\"{tstart}\":f\"{tend}\", \"Close\"].values\n",
+    "    test = dataset.loc[f\"{tend+1}\":, \"Close\"].values\n",
+    "    return train, test\n",
+    "\n",
+    "training_set, test_set = train_test_split(dataset, tstart, tend)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "id": "9-K28DB02hVc"
+   },
+   "outputs": [],
+   "source": [
+    "sc = MinMaxScaler(feature_range=(0, 1))\n",
+    "training_set = training_set.reshape(-1, 1)\n",
+    "training_set_scaled = sc.fit_transform(training_set)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "e-miaXuw2qz0",
+    "outputId": "fa02cb0c-ecb5-407b-974d-d4d3b110acdf"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(array([[2.71045995],\n",
+       "        [2.73773789],\n",
+       "        [2.62437391],\n",
+       "        [2.65265298],\n",
+       "        [2.70044994],\n",
+       "        [2.65640593],\n",
+       "        [2.55280304],\n",
+       "        [2.56181192],\n",
+       "        [2.50875902],\n",
+       "        [2.54029012],\n",
+       "        [2.50275302],\n",
+       "        [2.54204202],\n",
+       "        [2.56006002],\n",
+       "        [2.56030989],\n",
+       "        [2.63588595],\n",
+       "        [2.69019008],\n",
+       "        [2.79004002],\n",
+       "        [2.80280304],\n",
+       "        [2.85210204],\n",
+       "        [2.94019008],\n",
+       "        [2.98698711],\n",
+       "        [2.9489491 ],\n",
+       "        [2.96246195],\n",
+       "        [3.02352405],\n",
+       "        [2.99874902],\n",
+       "        [2.95945907],\n",
+       "        [3.17467499],\n",
+       "        [3.28028011],\n",
+       "        [3.24324298],\n",
+       "        [3.31781793],\n",
+       "        [3.37987995],\n",
+       "        [3.462713  ],\n",
+       "        [3.43042994],\n",
+       "        [3.47472501],\n",
+       "        [3.446697  ],\n",
+       "        [3.38488507],\n",
+       "        [3.43843794],\n",
+       "        [3.52602601],\n",
+       "        [3.55355406],\n",
+       "        [3.60635591],\n",
+       "        [3.73273301],\n",
+       "        [3.70220208],\n",
+       "        [3.51576591],\n",
+       "        [3.7382381 ],\n",
+       "        [4.31506491],\n",
+       "        [4.68969011],\n",
+       "        [4.54955006],\n",
+       "        [4.65390396],\n",
+       "        [4.83733702],\n",
+       "        [4.77077103],\n",
+       "        [4.90565586],\n",
+       "        [4.87662697],\n",
+       "        [4.79654694],\n",
+       "        [4.62212181],\n",
+       "        [4.237988  ],\n",
+       "        [4.31806803],\n",
+       "        [4.22172213],\n",
+       "        [4.20070124],\n",
+       "        [4.58008003],\n",
+       "        [4.55455494]]), array([4.62637615]))"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "training_set[1:61], training_set[61]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "pCS_Abd22_qp",
+    "outputId": "dcf26e00-8f90-43ee-9729-78d694dfa4e1"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4634, 6)"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dataset.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "id": "zSPZG9TD2ulA"
+   },
+   "outputs": [],
+   "source": [
+    "def split_sequence(sequence, n_steps):\n",
+    "    X, y = list(), list()\n",
+    "    for i in range(len(sequence)):\n",
+    "        end_ix = i + n_steps\n",
+    "        if end_ix > len(sequence) - 1:\n",
+    "            break\n",
+    "        seq_x, seq_y = sequence[i:end_ix], sequence[end_ix]\n",
+    "        X.append(seq_x)\n",
+    "        y.append(seq_y)\n",
+    "    return np.array(X), np.array(y)\n",
+    "\n",
+    "\n",
+    "n_steps = 40\n",
+    "\n",
+    "# split into samples\n",
+    "X_train, y_train = split_sequence(training_set_scaled, n_steps)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "TCDT23bv3MuI",
+    "outputId": "9f0a9cb5-0aa7-4751-d6d1-d7330a35d963"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4082, 40, 1)"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "T40GWRRK3RFh",
+    "outputId": "4544a77e-5d28-4880-c2eb-7b0176d6c5d8"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[9.30508387e-05]\n",
+      " [2.34047199e-03]\n",
+      " [2.64784388e-03]\n",
+      " [1.37044198e-03]\n",
+      " [1.68909463e-03]\n",
+      " [2.22767781e-03]\n",
+      " [1.73138338e-03]\n",
+      " [5.63970935e-04]\n",
+      " [6.65484360e-04]\n",
+      " [6.76765122e-05]\n",
+      " [4.22973500e-04]\n",
+      " [0.00000000e+00]\n",
+      " [4.42714162e-04]\n",
+      " [6.45743698e-04]\n",
+      " [6.48559187e-04]\n",
+      " [1.50016134e-03]\n",
+      " [2.11206813e-03]\n",
+      " [3.23719182e-03]\n",
+      " [3.38100743e-03]\n",
+      " [3.93651578e-03]\n",
+      " [4.92910463e-03]\n",
+      " [5.45642048e-03]\n",
+      " [5.02780256e-03]\n",
+      " [5.18006733e-03]\n",
+      " [5.86812396e-03]\n",
+      " [5.58895532e-03]\n",
+      " [5.14623042e-03]\n",
+      " [7.57131484e-03]\n",
+      " [8.76128881e-03]\n",
+      " [8.34394898e-03]\n",
+      " [9.18427037e-03]\n",
+      " [9.88359433e-03]\n",
+      " [1.08169693e-02]\n",
+      " [1.04531989e-02]\n",
+      " [1.09523223e-02]\n",
+      " [1.06364986e-02]\n",
+      " [9.93999277e-03]\n",
+      " [1.05434343e-02]\n",
+      " [1.15303895e-02]\n",
+      " [1.18405795e-02]]\n",
+      "\n",
+      "\n",
+      "Number of values in each record (features) : 40\n"
+     ]
+    }
+   ],
+   "source": [
+    "## Printing the first record after sequencing\n",
+    "print(X_train[0])\n",
+    "\n",
+    "## Number of input values in the each record\n",
+    "print(\"\\n\\nNumber of values in each record (features) :\", len(X_train[0]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "8CnWj0y-4TRs",
+    "outputId": "66f79b4b-74a5-42d7-f32b-44fa165894a2"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4082, 40, 1)"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {
+    "id": "nTmav8QZ4sCF"
+   },
+   "outputs": [],
+   "source": [
+    "# Reshaping X_train for model\n",
+    "features=1\n",
+    "X_train = X_train.reshape(X_train.shape[0],X_train.shape[1],features)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {
+    "id": "JfuJ_H484X5s"
+   },
+   "outputs": [],
+   "source": [
+    "# The LSTM architecture\n",
+    "model_lstm = Sequential()\n",
+    "\n",
+    "## RNN Layer\n",
+    "model_lstm.add(LSTM(units=125, activation=\"tanh\", input_shape=(n_steps, features)))\n",
+    "\n",
+    "## Output Layer\n",
+    "model_lstm.add(Dense(units=1))\n",
+    "\n",
+    "# Compiling the model\n",
+    "model_lstm.compile(optimizer=\"RMSprop\", loss=\"mse\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "IbjR0Iw64jQN",
+    "outputId": "c4eea2de-a9e8-47d7-c526-a6ffdf98f4e9"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Epoch 1/50\n",
+      "128/128 [==============================] - 18s 109ms/step - loss: 0.0023\n",
+      "Epoch 2/50\n",
+      "128/128 [==============================] - 9s 69ms/step - loss: 6.9384e-04\n",
+      "Epoch 3/50\n",
+      "128/128 [==============================] - 10s 79ms/step - loss: 5.0254e-04\n",
+      "Epoch 4/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 3.9558e-04\n",
+      "Epoch 5/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 3.2347e-04\n",
+      "Epoch 6/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 3.1316e-04\n",
+      "Epoch 7/50\n",
+      "128/128 [==============================] - 7s 58ms/step - loss: 2.7732e-04\n",
+      "Epoch 8/50\n",
+      "128/128 [==============================] - 8s 62ms/step - loss: 2.4696e-04\n",
+      "Epoch 9/50\n",
+      "128/128 [==============================] - 8s 66ms/step - loss: 2.3380e-04\n",
+      "Epoch 10/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 2.1730e-04\n",
+      "Epoch 11/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 2.0930e-04\n",
+      "Epoch 12/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.9290e-04\n",
+      "Epoch 13/50\n",
+      "128/128 [==============================] - 9s 67ms/step - loss: 1.8660e-04\n",
+      "Epoch 14/50\n",
+      "128/128 [==============================] - 8s 65ms/step - loss: 1.8037e-04\n",
+      "Epoch 15/50\n",
+      "128/128 [==============================] - 9s 71ms/step - loss: 1.6848e-04\n",
+      "Epoch 16/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.6769e-04\n",
+      "Epoch 17/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.5705e-04\n",
+      "Epoch 18/50\n",
+      "128/128 [==============================] - 8s 64ms/step - loss: 1.5469e-04\n",
+      "Epoch 19/50\n",
+      "128/128 [==============================] - 9s 69ms/step - loss: 1.4165e-04\n",
+      "Epoch 20/50\n",
+      "128/128 [==============================] - 8s 63ms/step - loss: 1.4319e-04\n",
+      "Epoch 21/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.4777e-04\n",
+      "Epoch 22/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.3215e-04\n",
+      "Epoch 23/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.4250e-04\n",
+      "Epoch 24/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.3524e-04\n",
+      "Epoch 25/50\n",
+      "128/128 [==============================] - 7s 53ms/step - loss: 1.2054e-04\n",
+      "Epoch 26/50\n",
+      "128/128 [==============================] - 7s 53ms/step - loss: 1.2418e-04\n",
+      "Epoch 27/50\n",
+      "128/128 [==============================] - 7s 53ms/step - loss: 1.2621e-04\n",
+      "Epoch 28/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.2269e-04\n",
+      "Epoch 29/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.2241e-04\n",
+      "Epoch 30/50\n",
+      "128/128 [==============================] - 7s 57ms/step - loss: 1.2215e-04\n",
+      "Epoch 31/50\n",
+      "128/128 [==============================] - 7s 56ms/step - loss: 1.0995e-04\n",
+      "Epoch 32/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.1905e-04\n",
+      "Epoch 33/50\n",
+      "128/128 [==============================] - 8s 66ms/step - loss: 1.1265e-04\n",
+      "Epoch 34/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.1228e-04\n",
+      "Epoch 35/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.1186e-04\n",
+      "Epoch 36/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.1158e-04\n",
+      "Epoch 37/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.1887e-04\n",
+      "Epoch 38/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.1028e-04\n",
+      "Epoch 39/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.0083e-04\n",
+      "Epoch 40/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.0745e-04\n",
+      "Epoch 41/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.0073e-04\n",
+      "Epoch 42/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 9.7972e-05\n",
+      "Epoch 43/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 1.0539e-04\n",
+      "Epoch 44/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.0295e-04\n",
+      "Epoch 45/50\n",
+      "128/128 [==============================] - 7s 58ms/step - loss: 9.4832e-05\n",
+      "Epoch 46/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 9.9743e-05\n",
+      "Epoch 47/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 1.0273e-04\n",
+      "Epoch 48/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 9.6143e-05\n",
+      "Epoch 49/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 9.5476e-05\n",
+      "Epoch 50/50\n",
+      "128/128 [==============================] - 7s 55ms/step - loss: 9.3421e-05\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<keras.callbacks.History at 0x7fa2d9d3f8b0>"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "## Fitting the model\n",
+    "model_lstm.fit(X_train, y_train, epochs=50, batch_size=32)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "UNKAGUmU4m73",
+    "outputId": "00727cbe-161f-4244-9fe6-7e65cd6473df"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'method'>\n"
+     ]
+    }
+   ],
+   "source": [
+    "dataset_total = dataset.loc[:,\"Close\"]\n",
+    "inputs = dataset_total[len(dataset_total) - len(test_set) - n_steps :].values\n",
+    "print(type(input))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "YW1X2oU_48_D",
+    "outputId": "8cf7880f-8ccc-41ee-879d-bb2918744b33"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "16/16 [==============================] - 1s 20ms/step\n"
+     ]
+    }
+   ],
+   "source": [
+    "inputs = inputs.reshape(-1, 1)\n",
+    "\n",
+    "#scaling\n",
+    "inputs = sc.transform(inputs)\n",
+    "\n",
+    "# Split into samples\n",
+    "X_test, y_test = split_sequence(inputs, n_steps)\n",
+    "\n",
+    "# reshape\n",
+    "X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], features)\n",
+    "\n",
+    "#prediction\n",
+    "predicted_stock_price = model_lstm.predict(X_test)\n",
+    "\n",
+    "#inverse transform the values\n",
+    "predicted_stock_price = sc.inverse_transform(predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {
+    "id": "KknNBDZL5ARz"
+   },
+   "outputs": [],
+   "source": [
+    "def plot_predictions(test, predicted):\n",
+    "    plt.plot(test, color=\"gray\", label=\"Real\")\n",
+    "    plt.plot(predicted, color=\"red\", label=\"Predicted\")\n",
+    "    plt.title(\"Google Stock Price Prediction\")\n",
+    "    plt.xlabel(\"Time\")\n",
+    "    plt.ylabel(\"google Stock Price\")\n",
+    "    plt.legend()\n",
+    "    plt.show()\n",
+    "\n",
+    "\n",
+    "def return_rmse(test, predicted):\n",
+    "    rmse = np.sqrt(mean_squared_error(test, predicted))\n",
+    "    print(\"The root mean squared error is {:.2f}.\".format(rmse))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 295
+    },
+    "id": "-AP4SgHk5Djh",
+    "outputId": "5dddaad0-72fb-41d9-e46a-d0a147722e1d"
+   },
+   "outputs": [
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAYUAAAEWCAYAAACJ0YulAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4yLjIsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+WH4yJAAAgAElEQVR4nOy9eXxU1f3//3xPJvueQNhXARUQEMGlBaWKglbFpVatrdKi1lpttbXtx6XVLtr+bG0rbd2q1qV1Qb8uWKXFDbAiIqsgiyKyBEICgeyTZWbO749z7507ayYhCYGc5+ORx8xd58xk5r7u+33eiyilMBgMBoMBwHOoB2AwGAyG7oMRBYPBYDA4GFEwGAwGg4MRBYPBYDA4GFEwGAwGg4MRBYPBYDA4GFEwHDJE5C4R+eehHkciRGSbiEzvhPMOFpE6EUnp6HN3FiKySESutp5fISIL23meBSJyVceOztBRGFEwICKXiciHIlIvIhXW8+tFRA712OIhIlNEZKmIVIvIfhF5X0QmW9tmi8j/DsGYlPUZ1onILhH5Y7yLvlJqh1IqRykVOFRjOBiUUv9SSp2VxHiihF8pdbZS6smOHpOhYzCi0MMRkR8D9wO/B/oCfYDrgC8DaYdwaHERkTzg38BfgCJgAPBLoOlQjstivFIqBzgD+AZwTeQOIuLtAWMwHKYYUejBiEg+8CvgeqXUi0qpWqVZrZS6QinVZO8nIk+JyF4R2S4id4iIx9rmsZa3W1bGU9Z57de40tpWKSI/T+SOEZGTrbv/KhFZKyLT4gx9FIBS6lmlVEAp5VNKLVRKfSwixwIPAadYd8tVrb0Ha/s1IrJRRGpFZIOITIwxvmNF5AsRuby1z1YptQl4DxgrIkOtO/g5IrIDeMe1zmudu0hE/iEiu0XkgIi84nrdc0VkjfW5LBWRca29fjJjsM79Het9HxCR/4rIENfrnikimyxr7K+AuLaFWWMiMkZE3rSstnIRuU1EZgK3AZda/4u11r5uN1Tc749rzFeJyA4R2Scityfz3g0HgVLK/PXQP2Am4Ae8rez3FPAqkAsMBT4F5ljbvgNsAYYDOcBLwNPWttFAHTAFbXX8AWgBplvb7wL+aT0fAFQC56BvVs60lnvHGE+ete1J4GygMGL7bOB/bXgPlwC7gMnoC98IYIi1bRswHZgI7ADOTfA5KWCE673vAeZYr6esMWQDma51Xmv/14HngUIgFTjNWn88UAGcBKQAV1ljSu+AMcyy/nfHAl7gDmCpdWwvoBb4mjWem63vytWRn7H1mZYBPwYyrOWTIv/HrjEucp0n0ffHHvPfrfGOR1uDxx7q386R/HfIB2D+DuE/H74J7IlYtxSoAnzAqdaFqBkY7drnu8Ai6/nbaEvD3nY0+sLvBX4BPOvalmWdK5Yo/My+GLj2/y9wVZyxHws8AZRaF6v5QB9rm3PBspZbew//BX4Y53W2oV1TpcC0Vj5PBdQAB4DPgd+gBc6+uA137Wuv8wL9gCAR4mbt9yDw64h1m7FE4yDHsABLGK1lD9AADAGuBJa5ton1GcQShcuB1XHG4/yPXesWuc6T6Ptjj3mga/ty4LJD/ds5kv+MX7FnUwn0EhGvUsoPoJT6EoCIlKIvEr3Qd4rbXcdtR9/ZA/SPsc2LnpvoD+y0NyilGkSkMs5YhgCXiMh5rnWpwLuxdlZKbURfmBCRY4B/An9GX6Aiae09DEJfQONxHbBYKbUowT42E5VSW9wrJDRfvzN6d+f19yulDsTYNgS4SkRudK1LQ3+2BzuGIcD9InKfe1f05xL5v1Mikmj8iT6/RCT6/tjscT1vQFsUhk7CzCn0bD5Am+OzEuyzD33nNsS1bjDa3QKwO8Y2P1COdikMtDeISCZQHOd1dqIthQLXX7ZS6netvQmlfedPAGPtVW18DzuBoxK8xHXAYBH5U2tjaW2ocdbvBIpEpCDOtrsjPpcspdSzHTCGncB3I86dqZRaiv7fDbJ3FK0qg4jNTrT7p7XXi0Wi74/hEGBEoQejlKpCu0YeEJGviUiuNfE3Ae13RumQyXnA3db2IcCP0HfmAM8CN4vIMBHJAe4BnrcsjxeB80TkSyKShnYlxAtz/ae17wwRSRGRDBGZJiIDI3cUkWNE5Mf2NhEZhLYQllm7lAMDrddM5j08CtwiIieIZoR7whXtW58JnCoirYpUW1FKlaFdOQ+ISKGIpIrIqdbmvwPXichJ1tiyReSrIpLbAS/9EHCriIwBZzL+Emvb68AYEbnImgz/ATo6LRb/BvqJyE0ikm59xidZ28qBoeKa1I8g0ffHcAgwotDDUUrdi75A/hT9Ay4HHkb7+Jdau90I1ANbgf8BzwCPW9seB54GlgBfAI3W/iilPrGeP4e+86xDT5pGhY4qpXaiLZbbgL3ou8+fEPs7WoueeP1QROrRYrAePdEJOrLmE2CPiOxr7T0opV4A7rbW1QKvoENd3eOrQk9+ny0iv44xpoPlW2hrZhP6M7rJet0V6JDSv6LnCbZguc0OFqXUy8D/BzwnIjXoz/Bsa9s+9AT879BuxpHA+3HOU4v+bM5Du3o+A75ibX7BeqwUkVUxDo/7/TEcGkQp02TH0DVYd4JVwEil1BeHejwGgyEaYykYOhUROU9EskQkGx2Sug4d0WMwGLohRhQMnc0s9GTibrQL4jJlzFODodti3EcGg8FgcDCWgsFgMBgcDuvktV69eqmhQ4ce6mEYDAbDYcXKlSv3KaV6x9p2WIvC0KFDWbFixaEehsFgMBxWiMj2eNuM+8hgMBgMDkYUDAaDweBgRMFgMBgMDof1nILBYDgyaWlpobS0lMbGxkM9lMOajIwMBg4cSGpqatLHGFEwGAzdjtLSUnJzcxk6dKi77LehDSilqKyspLS0lGHDhiV9XKe5j0Tkcau93nrXurtENxNfY/2d49p2q4hsEZHNIjKjs8ZlMBi6P42NjRQXFxtBOAhEhOLi4jZbW505p/AEutxwJH9SSk2w/t4AEJHRwGXAGOuYB0QkpRPHZjAYujlGEA6e9nyGnSYKSqklwP4kd58FPKeUarKqZ24BTuyssRkMkaxdu9b4rw0GDk300Q0i8rHlXiq01g0gvE1gKaFWiWGIyLUiskJEVuzdu7ezx2roAVRWVvLKK6/w0ksvHeqhGLoRKSkpTJgwgbFjx3LeeedRVVXVrvM88cQT3HDDDR08us6jq0XhQXTbwwnopiv3Jd49GqXUI0qpSUqpSb17x8zSNhgS0tjYSEtLi7NcU1MDwLZt2w7RiAzdkczMTNasWcP69espKirib3/726EeUpfQpaKglCpXSgWUUkF0m0HbRbSL8P6vAwn1zzUYOoyysjLuv/9+/vrXv9LQ0EBTUxPV1dUAYUJhMLg55ZRT2LVLX5I+//xzZs6cyQknnMDUqVPZtGkTAK+99honnXQSxx9/PNOnT6e8/PBsM92lIaki0s/qRwtwIbr9H8B84BkR+SPQH113f3lXjs3QM1i6dCmNjY00NjYyf/58Nm/ezMiRI53tLS0tbYrpNnQ+//nPf9izZ0+HnrNv377MnBkrDiaaQCDA22+/zZw5cwC49tpreeihhxg5ciQffvgh119/Pe+88w5Tpkxh2bJliAiPPvoo9957L/fd12ZnyCGn00RBRJ4FpgG9RKQUuBOYZjWFV+juW98F3ctXROYBGwA/8H2r2brBcND4/X4qKyspLi5m06ZNDBkyhO3bt7N161YAPvvsM2ff+vp6CgoKwo4/cOAA7733HlOnTqWgoKBDo2JaWlpQSpGWltZh5zR0DD6fjwkTJrBr1y6OPfZYzjzzTOrq6li6dCmXXHKJs19Tk245XlpayqWXXkpZWRnNzc1tyg3oTnSaKCilLo+x+rEE+9+Nbp5uMHQor776KuvXr2fOnDn4/X5GjhzJ9u3bY7qLGhoaokRh8eLFrF27ltWrV3P55ZczatQoZ1tNTQ1PPfUUl112Gb169Wrz2O677z6ampq488472/7GegjJ3tF3NPacQkNDAzNmzOBvf/sbs2fPpqCggDVr1kTtf+ONN/K
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plot_predictions(test_set,predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "IRSB7AD95Gn-",
+    "outputId": "a3e5088d-aa29-4f77-8a33-6a7e47aa0c95"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The root mean squared error is 5.66.\n"
+     ]
+    }
+   ],
+   "source": [
+    "return_rmse(test_set,predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "G7PWUbaL5LAz",
+    "outputId": "21cbc7d6-a162-4596-fc63-c471ea0f1aa0"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Model: \"sequential_1\"\n",
+      "_________________________________________________________________\n",
+      " Layer (type)                Output Shape              Param #   \n",
+      "=================================================================\n",
+      " gru (GRU)                   (None, 125)               48000     \n",
+      "                                                                 \n",
+      " dense_1 (Dense)             (None, 1)                 126       \n",
+      "                                                                 \n",
+      "=================================================================\n",
+      "Total params: 48,126\n",
+      "Trainable params: 48,126\n",
+      "Non-trainable params: 0\n",
+      "_________________________________________________________________\n"
+     ]
+    }
+   ],
+   "source": [
+    "model_gru = Sequential()\n",
+    "model_gru.add(GRU(units=125, activation=\"tanh\", input_shape=(n_steps, features)))\n",
+    "model_gru.add(Dense(units=1))\n",
+    "# Compiling the RNN\n",
+    "model_gru.compile(optimizer=\"RMSprop\", loss=\"mse\")\n",
+    "\n",
+    "model_gru.summary()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "DCqPP5MB5LjT",
+    "outputId": "9b73aae1-64d4-4f9b-c956-0e64cebb4748"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Epoch 1/50\n",
+      "128/128 [==============================] - 8s 44ms/step - loss: 0.0020\n",
+      "Epoch 2/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 4.7151e-04\n",
+      "Epoch 3/50\n",
+      "128/128 [==============================] - 7s 54ms/step - loss: 3.3761e-04\n",
+      "Epoch 4/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 3.0696e-04\n",
+      "Epoch 5/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 2.6082e-04\n",
+      "Epoch 6/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 2.3662e-04\n",
+      "Epoch 7/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 2.1527e-04\n",
+      "Epoch 8/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.9288e-04\n",
+      "Epoch 9/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.8307e-04\n",
+      "Epoch 10/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.7877e-04\n",
+      "Epoch 11/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.7306e-04\n",
+      "Epoch 12/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.6384e-04\n",
+      "Epoch 13/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.6243e-04\n",
+      "Epoch 14/50\n",
+      "128/128 [==============================] - 5s 43ms/step - loss: 1.5140e-04\n",
+      "Epoch 15/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.4708e-04\n",
+      "Epoch 16/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.4102e-04\n",
+      "Epoch 17/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.3577e-04\n",
+      "Epoch 18/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.3130e-04\n",
+      "Epoch 19/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.2691e-04\n",
+      "Epoch 20/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.2852e-04\n",
+      "Epoch 21/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.1789e-04\n",
+      "Epoch 22/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.2760e-04\n",
+      "Epoch 23/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.2389e-04\n",
+      "Epoch 24/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.0948e-04\n",
+      "Epoch 25/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.1710e-04\n",
+      "Epoch 26/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.0961e-04\n",
+      "Epoch 27/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.1276e-04\n",
+      "Epoch 28/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.0636e-04\n",
+      "Epoch 29/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 1.0324e-04\n",
+      "Epoch 30/50\n",
+      "128/128 [==============================] - 7s 51ms/step - loss: 1.0893e-04\n",
+      "Epoch 31/50\n",
+      "128/128 [==============================] - 5s 43ms/step - loss: 1.0146e-04\n",
+      "Epoch 32/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 1.0613e-04\n",
+      "Epoch 33/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 9.9458e-05\n",
+      "Epoch 34/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 9.4508e-05\n",
+      "Epoch 35/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 9.8078e-05\n",
+      "Epoch 36/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 9.3602e-05\n",
+      "Epoch 37/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 9.6247e-05\n",
+      "Epoch 38/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 9.0197e-05\n",
+      "Epoch 39/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 8.9798e-05\n",
+      "Epoch 40/50\n",
+      "128/128 [==============================] - 7s 57ms/step - loss: 9.1757e-05\n",
+      "Epoch 41/50\n",
+      "128/128 [==============================] - 6s 46ms/step - loss: 9.2565e-05\n",
+      "Epoch 42/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 8.8535e-05\n",
+      "Epoch 43/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 8.5386e-05\n",
+      "Epoch 44/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 8.6250e-05\n",
+      "Epoch 45/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 3.6104e-04\n",
+      "Epoch 46/50\n",
+      "128/128 [==============================] - 5s 43ms/step - loss: 8.0274e-05\n",
+      "Epoch 47/50\n",
+      "128/128 [==============================] - 5s 41ms/step - loss: 8.4788e-05\n",
+      "Epoch 48/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 8.4326e-05\n",
+      "Epoch 49/50\n",
+      "128/128 [==============================] - 5s 42ms/step - loss: 7.9301e-05\n",
+      "Epoch 50/50\n",
+      "128/128 [==============================] - 5s 43ms/step - loss: 8.1348e-05\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<keras.callbacks.History at 0x7fa2d9aa3fa0>"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model_gru.fit(X_train, y_train, epochs=50, batch_size=32)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 312
+    },
+    "id": "mDkNiKD25VlR",
+    "outputId": "42b937d9-5809-43e7-f229-521d9f463835"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "16/16 [==============================] - 1s 12ms/step\n"
+     ]
+    },
+    {
+     "data": {
+      "image/png": "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
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "GRU_predicted_stock_price = model_gru.predict(X_test)\n",
+    "GRU_predicted_stock_price = sc.inverse_transform(GRU_predicted_stock_price)\n",
+    "plot_predictions(test_set, GRU_predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "SSCM6kRS5bGf",
+    "outputId": "7df9427f-d517-41a5-a35b-78cf5ad54c64"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The root mean squared error is 2.36.\n"
+     ]
+    }
+   ],
+   "source": [
+    "return_rmse(test_set,GRU_predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {
+    "id": "fHSjF3dPcDeN"
+   },
+   "outputs": [],
+   "source": [
+    "model_bid = Sequential()\n",
+    "model_bid.add(Bidirectional(LSTM(units=100, activation=\"tanh\", input_shape=(n_steps, features))))\n",
+    "model_bid.add(Dense(units=1))\n",
+    "# Compiling the RNN\n",
+    "model_bid.compile(optimizer=\"RMSprop\", loss=\"mse\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "anjKFUddj4gb",
+    "outputId": "2b26b313-a7ab-41cf-eab6-254e3cc1800c"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Epoch 1/25\n",
+      "128/128 [==============================] - 11s 49ms/step - loss: 0.0029\n",
+      "Epoch 2/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 6.7468e-04\n",
+      "Epoch 3/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 4.9198e-04\n",
+      "Epoch 4/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 3.8964e-04\n",
+      "Epoch 5/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 3.4143e-04\n",
+      "Epoch 6/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 3.0530e-04\n",
+      "Epoch 7/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 2.6742e-04\n",
+      "Epoch 8/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 2.6520e-04\n",
+      "Epoch 9/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 2.4386e-04\n",
+      "Epoch 10/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 2.1909e-04\n",
+      "Epoch 11/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 2.1637e-04\n",
+      "Epoch 12/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 2.0418e-04\n",
+      "Epoch 13/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 1.9392e-04\n",
+      "Epoch 14/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.8301e-04\n",
+      "Epoch 15/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.7855e-04\n",
+      "Epoch 16/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.7772e-04\n",
+      "Epoch 17/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.7450e-04\n",
+      "Epoch 18/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.5819e-04\n",
+      "Epoch 19/25\n",
+      "128/128 [==============================] - 6s 46ms/step - loss: 1.5151e-04\n",
+      "Epoch 20/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.5268e-04\n",
+      "Epoch 21/25\n",
+      "128/128 [==============================] - 8s 60ms/step - loss: 1.5585e-04\n",
+      "Epoch 22/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 1.4296e-04\n",
+      "Epoch 23/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.4665e-04\n",
+      "Epoch 24/25\n",
+      "128/128 [==============================] - 6s 48ms/step - loss: 1.2863e-04\n",
+      "Epoch 25/25\n",
+      "128/128 [==============================] - 6s 47ms/step - loss: 1.3235e-04\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<keras.callbacks.History at 0x7fa2d983b700>"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model_bid.fit(X_train, y_train, epochs=25, batch_size=32)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 312
+    },
+    "id": "pI6IcWROj-kn",
+    "outputId": "1798a8d0-77ea-4203-99ec-b59802adf410"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "16/16 [==============================] - 1s 16ms/step\n"
+     ]
+    },
+    {
+     "data": {
+      "image/png": "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
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "BID_predicted_stock_price = model_bid.predict(X_test)\n",
+    "BID_predicted_stock_price = sc.inverse_transform(BID_predicted_stock_price)\n",
+    "plot_predictions(test_set, BID_predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {
+    "id": "NCrC3hIfZYqI"
+   },
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "1hpZZcSej_ud",
+    "outputId": "8442be59-0bcc-4224-e35c-8a6219c6a6af"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The root mean squared error is 3.67.\n"
+     ]
+    }
+   ],
+   "source": [
+    "return_rmse(test_set,BID_predicted_stock_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {
+    "id": "D_-3gIIBkDnu"
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
